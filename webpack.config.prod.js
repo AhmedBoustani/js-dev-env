@@ -6,18 +6,27 @@ export default {
   debug: true,  // sends debugging info when runnign the build
   devtool: 'source-map',
   noInfo: false,  // To remove the noise in the commandline
-  entry: [
-    path.resolve(__dirname, 'src/index')  // Application entry point
-  ],
+  entry: {
+    vendor: path.resolve(__dirname, 'src/vendor'),
+    main: path.resolve(__dirname, 'src/index')  // Application main entry point
+  },
   target: 'web',  // could be node, electron....
   // webpack won't generate any physical files for the development build
   // it will create a bundle on memory and serve the build to the browser
   output: {
     path: path.resolve(__dirname, 'dist'),  // where the app will start from
     publicPath: '/',
-    filename: 'bundle.js'
+    filename: '[name].js'
   },
   plugins: [
+    // Use Commons ChunkPlugin to create a separate bundle
+    // of vendor libraries so that they're cached separately.
+    new webpack.optimize.CommonsChunkPlugin({
+      // The name should be the same as the key created in the entry point
+      // Otherwise, it will end up generating an empty file
+      name: 'vendor'
+    }),
+
     // Create HTML file that includes reference to bundled JS
     new HtmlWebpackPlugin({
       template: 'src/index.html',
